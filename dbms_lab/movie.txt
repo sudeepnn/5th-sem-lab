@@ -1,0 +1,49 @@
+create table actor(act_id varchar(20),name varchar(20),gender varchar(20) ,primary key(act_id));
+
+create table director (dir_id varchar(20),dir_name varchar(20),dir_phone varchar(20), primary key(dir_id));
+
+create table movie(mov_id varchar(20),mov_title varchar(20),mov_yr int,mov_lang varchar(20),dir_id varchar(20),
+ primary key(mov_id),
+foreign key(dir_id) references director(dir_id) on delete cascade);
+
+create table mov_cast(act_id varchar(20),mov_id varchar(20),role varchar(20),
+foreign key(act_id) references actor(act_id)on delete cascade,
+foreign key(mov_id) references movie(mov_id) on delete cascade);
+
+create table rating (mov_id varchar(20),rev_start varchar(20),
+foreign key(mov_id) references movie(mov_id) on delete cascade);
+
+
+insert into actor values('&act_id','&name','&gender');
+
+insert into director values('&dir_id','&dir_name','&dir_phone');
+
+insert into movie values('&mov_id','&mov_title','&mov_yr','&mov_lang','&dir_id');
+
+insert into mov_cast values('&act_id','&mov_id','&role');
+
+insert into rating values('&mov_id','&rev_start');
+
+select * from actor;
+select * from director;
+select * from movie;
+select * from mov_cast;
+select * from rating;
+
+ select mov_id,mov_title from movie where dir_id in (select dir_id from director where dir_name='hitchcock');
+
+select mov_title,mov_id from movie where mov_id in(select mov_id from 
+mov_cast where act_id in(select act_id from mov_cast group by(act_id) having count(act_id)>=2));
+
+
+
+
+select name,act_id from actor  where act_id in((select c.act_id from mov_cast c,movie m where m.mov_id=c.mov_id and 
+m.mov_yr<2000) intersect  (select c.act_id from mov_cast c,movie m where m.mov_id=c.mov_id and 
+m.mov_yr>2017));
+
+
+select m.mov_title, max(r.rev_start) from movie m,rating r where m.mov_id=r.mov_id group by (m.mov_title) order by (m.mov_title) 
+
+update rating set rev_start=6 where mov_id in(select mov_id from movie where dir_id in (select dir_id from director 
+where dir_name='steven'));

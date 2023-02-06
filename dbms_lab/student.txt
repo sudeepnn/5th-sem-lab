@@ -1,0 +1,46 @@
+create table stu(usn varchar(20),name varchar(20),address varchar(20),phone number(10),gender varchar(20),primary key(usn));
+
+create table semsec(ssid varchar(20),sem int,sec varchar(2) ,primary key(ssid));
+
+create table class(usn varchar(20),ssid varchar(20),foreign key(usn) references stu(usn),
+foreign key(ssid) references semsec(ssid));
+
+create table subject (subcode varchar(20),title varchar(20),sem int,credits int,primary key(subcode));
+
+create table iamarks(usn varchar(20),subcode varchar(20),ssid varchar(20),test1 int,test2 int,test3 int,finalia int,
+foreign key(usn) references stu(usn),foreign key(ssid) references semsec(ssid),foreign key(subcode) references subject(subcode)
+ )
+
+
+insert into stu values('&usn','&name','&address','&phone','&gender');
+
+insert into semsec values('&ssid','&sem','&sec');
+
+insert into class values('&usn','&ssid');
+
+insert into subject values('&subcode','&title','&sem','&credits');
+
+insert into iamarks values('&usn','&subcode','&ssid','&test1','&test2','&test3','&finalia');
+
+select * from stu;
+select * from semsec;
+select * from class;
+select * from subject;
+select * from iamarks;
+
+select * from stu where usn in (select usn from class where ssid in(select ssid from semsec where sem=4 and sec='c') );
+
+select sem,sec,gender ,count(*) from semsec,stu,class where stu.usn=class.usn and class.ssid=semsec.ssid group by(sem,sec,gender)
+order by(sem);
+
+create view t1 as select subcode ,test1 from iamarks where usn='1bi17cs101';
+
+update iamarks set finalia=greatest((test1+test2),(test2+test3),(test3+test1))/2;
+
+select i.usn,i.finalia, 
+case when finalia between 17 and 20 then 'outstanding'
+when finalia between 12 and 16 then 'average'
+when finalia between 17 and 20 then 'outstanding'
+when finalia <12 then 'weak'
+end as cat
+from iamarks i , semsec s where i.ssid=s.ssid and s.sem=8 and s.sec in ('a','b','c');  

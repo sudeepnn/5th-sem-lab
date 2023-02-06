@@ -1,0 +1,56 @@
+create table publish (name varchar(20),address varchar(20),phone number(10),primary key(name));
+
+create table books(book_id varchar(10),title varchar(10),pub_name varchar(20),pub_yr int,primary key(book_id),foreign key(pub_name)
+references publish(name));
+
+create table lib_prog(pro_id int,pro_name varchar(10),address varchar(10), primary key(pro_id));
+
+create table book_author(book_id varchar(10),author varchar(10),primary key(book_id,author),foreign key(book_id)references books(book_id));
+
+create table copies(book_id varchar(10),pro_id int,no_copies int,primary key(book_id,pro_id),
+foreign key(book_id)references books(book_id),foreign key(pro_id)references lib_prog(pro_id));
+
+create table lending( book_id varchar(10),pro_id int,card_no int,date_out date,due_date date,primary key(book_id,pro_id,card_no),
+ foreign key(book_id)references books(book_id),foreign key(pro_id)references lib_prog(pro_id));
+
+insert into publish values ('&name','&address','&phone');
+
+insert into books values ('&book_id','&title','&pub_name','&pub_yr');
+
+insert into lib_prog values('&pro_id','&pro_name','&address');
+
+insert into book_author values('&book_id','&author');
+
+insert into copies values('&book_id','&pro_id','&no_copies');
+
+insert into lending values('&book_id','&pro_id','&card_no','&date_out','&due_date');
+
+select * from publish;
+select * from books;
+select * from lib_prog;
+select * from book_author;
+select * from copies;
+select * from lending;
+
+select b.book_id,b.title,b.pub_name,b.pub_yr,a.author,c.no_copies,bb.pro_id from books b,book_author a,copies c,lib_prog bb where
+b.book_id=a.book_id and b.book_id=c.book_id and c.pro_id=bb.pro_id;
+
+select card_no from lending l where l.date_out between '1-jan-2017' and '30-jun-2017' group by(card_no) having count(*)>=3;
+
+
+create table book1(book_id varchar(10),title varchar(10),pub_name varchar(20),pub_yr int,primary key(book_id))
+partition by range(pub_yr)
+(
+partition p1 values less than(2001),
+partition p2 values less than(2005),
+partition p3 values less than(2017),
+partition p4 values less than(maxvalue)
+);
+insert into book1 values ('&book_id','&title','&pub_name','&pub_yr');
+
+select * from book1 partition(p1);
+
+create view ava_book as select b.book_id,b.title,
+sum(bc.no_copies)-(select count(*)from lending l where l.book_id=b.book_id group by(l.book_id))
+ as avail from books b,copies bc
+ where b.book_id=bc.book_id group by(b.book_id,b.title);

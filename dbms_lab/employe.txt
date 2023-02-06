@@ -1,0 +1,64 @@
+create table employee1(ssn varchar(20),name varchar(20),address varchar(20),sex varchar(20),salary int,
+super_ssn varchar(20) ,dno int ,primary key(ssn), foreign key(super_ssn) references employee1(ssn)
+);
+
+create table dept(dno int,dname varchar(20),mgrssn varchar(20),mgrdate date,primary key(dno)
+,foreign key(mgrssn) references employee1(ssn));
+
+alter table employee1 add constraint sdf foreign key(dno) references dept (dno);
+
+create table dloc(dno int ,dlo varchar(20),primary key(dno,dlo),foreign key(dno) references dept(dno));
+
+create table project (pno int,pname varchar(20),ploc varchar(20),dno int,primary key(pno),foreign key(dno)
+references dept(dno));
+
+ create table workson(ssn varchar(20),pno int, hours int,foreign key(ssn) references employee1(ssn),
+foreign key(pno)references dept(dno)); 
+
+insert into employee1 values('&ssn','&name','&address','&sex','&salary','&super_ssn','&dno');
+
+insert into dept values('&dno','&dname','&mgrssn','&mgrdate');
+
+insert into dloc values('&dno','&dlo');
+
+insert into project values('&pno','&pname','&ploc','&dno');
+
+insert into workson values('&ssn','&pno','&hours');
+
+select * from employee1;
+select * from dept;
+
+select * from dloc;
+select * from project;
+select * from workson;
+
+(select pno from workson where ssn in (select ssn from employee1 where name='scott')) union 
+(select pno from project where dno in (select dno from dept where mgrssn in (select ssn from employee1 where name='scott')));
+
+select ssn,name,salary ,salary+0.1*salary as updated from employee1 where ssn in(select ssn from workson where pno in 
+(select pno from project where pname='iot'));
+
+select sum(salary), avg(salary),max(salary),min(salary) from employee1 e ,dept d where e.dno=d.dno and d.dname='account';
+
+select ssn,name from employee1 e where not exists(
+(select pno from project where dno=5) minus (select pno from workson w where w.ssn=e.ssn));
+
+select dno ,count(ssn) as employ_no from employee1 where salary>=60000 group by(dno) having count(ssn)>=3;
+
+
+
+
+
+
+
+(select pno from workson where ssn in(select ssn from employee1 where name='scott') )union (select pno from project where dno in (select 
+dno from dept where mgrssn in(select ssn from employee1 where name='scott')));
+
+select ssn,name,salary,salary+0.1*salary as updated from employee1 where ssn in(select ssn from workson where pno in (select pno from project where pname='iot'));
+
+select sum(salary),avg(salary),max(salary),min(salary) from employee1 e, dept d where e.dno =d.dno and d.dname='account';
+
+select ssn,name from employee1 e where not exists( (select pno from project where dno=5)
+minus (select pno from workson w where w.ssn=e.ssn) );
+
+select dno,count(ssn) as no from employee1 where salary>=60000 group by(dno) having count(ssn)>=3;
